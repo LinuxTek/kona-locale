@@ -10,14 +10,20 @@ import java.text.Format;
 import java.text.MessageFormat;
 import java.text.NumberFormat;
 import java.text.ParsePosition;
+import java.util.ArrayList;
 import java.util.Currency;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
 import org.apache.log4j.Logger;
 
 import com.google.i18n.phonenumbers.NumberParseException;
+import com.google.i18n.phonenumbers.PhoneNumberMatch;
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.google.i18n.phonenumbers.Phonenumber.PhoneNumber;
 
@@ -224,6 +230,37 @@ public class KLocaleUtil {
 		return (phoneNumber);
 	}
     */
+    
+	public static Map<String,String> extractPhoneNumbers(String input) throws NumberParseException {
+        return extractPhoneNumbers(input, null);
+	}
+    
+    /**
+     * Extract phone numbers from a text as map of <PhoneNumberFormat.E164, Raw Match> entries.
+     * 
+     * @param input
+     * @param country
+     * @return
+     * @throws NumberParseException 
+     */
+	public static Map<String,String> extractPhoneNumbers(String input, String country) throws NumberParseException {
+		if (country == null || country.trim().length() == 0) {
+			country = "US";
+		}
+        
+		Iterable<PhoneNumberMatch> matches = PhoneNumberUtil.getInstance().findNumbers(input, country);
+        
+        Map<String,String> result = new HashMap<String,String>();
+        
+        for (PhoneNumberMatch match : matches) {
+            //PhoneNumber number = match.number();
+            String rawNumber = match.rawString();
+            String e164Number = toE164PhoneNumber(rawNumber, country);
+            result.put(e164Number, rawNumber);
+        }
+        
+        return result;
+	}
     
 	public static String toE164PhoneNumber(String number) throws NumberParseException {
         return toE164PhoneNumber(number, null);
