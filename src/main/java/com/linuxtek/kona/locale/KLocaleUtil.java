@@ -282,7 +282,12 @@ public class KLocaleUtil {
 		String phoneNumber = null;
 
 		if (country == null || country.trim().length() == 0) {
-			country = "US";
+			// assume US if not already an international number
+			if (!number.startsWith("+")) {
+				country = "US";
+			} else {
+				country = null;
+			}
 		}
         
 		PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance();
